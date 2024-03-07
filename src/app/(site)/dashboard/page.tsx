@@ -6,6 +6,8 @@ import { authOptions } from '@/lib/auth'
 import { getServerSession } from 'next-auth'
 import { Edit, File, Trash } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { TrashDelete } from '@/components/dashboard/SubmitButtons'
+import { revalidatePath } from 'next/cache'
 
 export const revalidate = 0
 
@@ -38,6 +40,20 @@ const DashboardPage = async () => {
   const user = session?.user
 
   const data = await getData(user?.id as string)
+
+  async function deleteNote(formData: FormData) {
+    'use server'
+
+    const noteId = formData.get('noteId') as string
+
+    await db.note.delete({
+      where: {
+        id: noteId,
+      },
+    })
+
+    revalidatePath('/dasboard')
+  }
   return (
     <div className="grid items-start gap-y-8">
       <div className="flex items-center justify-between px-2">
@@ -94,9 +110,9 @@ const DashboardPage = async () => {
                     <Edit className="h-4 w-4" />
                   </Button>
                 </Link>
-                <form>
+                <form action={deleteNote}>
                   <input type="hidden" name="noteId" value={item.id} />
-                  Trash Delete
+                  <TrashDelete />
                 </form>
               </div>
             </Card>

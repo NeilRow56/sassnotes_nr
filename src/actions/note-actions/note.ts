@@ -13,6 +13,10 @@ export const note_creation = async (values: z.infer<typeof NoteSchema>) => {
   const user = session?.user
   const userId = user?.id
 
+  if (!userId) {
+    throw new Error('Not authorized')
+  }
+
   const validatedFields = NoteSchema.safeParse(values)
 
   if (!validatedFields.success) {
